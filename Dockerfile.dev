@@ -1,0 +1,16 @@
+FROM golang:1
+
+ARG USER_ID=1000
+ARG GROUP_ID=1000
+
+RUN \
+  groupadd --gid "${GROUP_ID}" maple && \
+  useradd --uid "${USER_ID}" --gid "${GROUP_ID}" --shell /bin/bash --create-home maple
+
+USER maple
+
+WORKDIR /tmp/deps
+COPY ./go.mod ./go.sum ./
+RUN go mod download
+
+WORKDIR /usr/src/app

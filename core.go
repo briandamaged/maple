@@ -16,22 +16,6 @@ func Values[K comparable, V any](m map[K]V) []V {
 	return values
 }
 
-type Pairing[K comparable, V any] struct {
-	Key   K
-	Value V
-}
-
-func Pairings[K comparable, V any](m map[K]V) []Pairing[K, V] {
-	var pairings = make([]Pairing[K, V], 0, len(m))
-	for k, v := range m {
-		pairings = append(pairings, Pairing[K, V]{
-			Key:   k,
-			Value: v,
-		})
-	}
-	return pairings
-}
-
 func Invert[K comparable, V comparable](m map[K]V) map[V][]K {
 	retval := map[V][]K{}
 	for k, v := range m {

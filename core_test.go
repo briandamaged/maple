@@ -1,7 +1,6 @@
 package maple_test
 
 import (
-	c "cmp"
 	"slices"
 	"testing"
 
@@ -14,7 +13,7 @@ func TestNewDefaulter(t *testing.T) {
 		3: 10,
 	}
 
-	d := maple.DefaulterFor(&m, func(k int) int {
+	d := maple.DefaulterFor(m, func(k int) int {
 		return 2 * k
 	})
 
@@ -35,37 +34,31 @@ func TestNewDefaulter(t *testing.T) {
 	}
 }
 
-func TestInversePairings(t *testing.T) {
-	m := map[string]int{}
-	for _, w := range []string{"foo", "bar", "quuz", "blorp"} {
-		m[w] = len(w)
+func TestInvert(t *testing.T) {
+	m := map[string]int{
+		"foo":   1,
+		"bar":   2,
+		"quuz":  1,
+		"blarg": 3,
+		"fwoop": 1,
 	}
 
-	ips := maple.InversePairings(m)
-	if len(ips) != 3 {
-		t.Error("expected 3 InversePairings")
+	im := maple.Invert(m)
+
+	expected := map[int][]string{
+		1: {"foo", "fwoop", "quuz"},
+		2: {"bar"},
+		3: {"blarg"},
 	}
 
-	slices.SortFunc(ips, func(x, y maple.InversePairing[string, int]) int {
-		return c.Compare(x.Value, y.Value)
-	})
-
-	expected := []maple.InversePairing[string, int]{
-		{
-			Value: 3,
-			Keys:  []string{"foo", "bar"},
-		},
-		{
-			Value: 4,
-			Keys:  []string{"quuz"},
-		},
-		{
-			Value: 5,
-			Keys:  []string{"blorp"},
-		},
-	}
-
-	if diff := cmp.Diff(ips, expected); diff != "" {
-		t.Error(diff)
+	for v, expectedKeys := range expected {
+		if keys, exists := im[v]; exists {
+			slices.Sort(keys)
+			if diff := cmp.Diff(keys, expectedKeys); diff != "" {
+				t.Error(diff)
+			}
+		} else {
+			t.Errorf("expected `im[%d]` to exist", v)
+		}
 	}
 }

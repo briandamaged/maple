@@ -33,53 +33,42 @@ func Pairings[K comparable, V any](m map[K]V) []Pairing[K, V] {
 }
 
 type Defaulter[K comparable, V any] struct {
-	MapPtr      *map[K]V
+	Map         map[K]V
 	DefaultFunc func(K) V
 }
 
-func DefaulterFor[K comparable, V any](m *map[K]V, f func(K) V) Defaulter[K, V] {
+func DefaulterFor[K comparable, V any](m map[K]V, f func(K) V) Defaulter[K, V] {
 	return Defaulter[K, V]{
-		MapPtr:      m,
+		Map:         m,
 		DefaultFunc: f,
 	}
 }
 
 func EmptyDefaulter[K comparable, V any](f func(K) V) Defaulter[K, V] {
-	m := make(map[K]V)
-	return DefaulterFor(&m, f)
+	return Defaulter[K, V]{
+		Map:         map[K]V{},
+		DefaultFunc: f,
+	}
 }
 
 func (d Defaulter[K, V]) Get(key K) V {
-	v, exists := (*d.MapPtr)[key]
+	v, exists := d.Map[key]
 	if !exists {
 		v = d.DefaultFunc(key)
-		(*d.MapPtr)[key] = v
+		d.Map[key] = v
 	}
 	return v
 }
 
-type InversePairing[K comparable, V comparable] struct {
-	Value V
-	Keys  []K
-}
-
-func InversePairings[K comparable, V comparable](m map[K]V) []InversePairing[K, V] {
-	d := EmptyDefaulter(func(v V) *InversePairing[K, V] {
-		return &InversePairing[K, V]{
-			Value: v,
-			Keys:  []K{},
-		}
-	})
-
+func Invert[K comparable, V comparable](m map[K]V) map[V][]K {
+	retval := map[V][]K{}
 	for k, v := range m {
-		ip := d.Get(v)
-		ip.Keys = append(ip.Keys, k)
+		keys, exists := retval[v]
+		if !exists {
+			keys = []K{}
+		}
+		retval[v] = append(keys, k)
 	}
 
-	ips := make([]InversePairing[K, V], 0, len(*d.MapPtr))
-	for _, v := range *d.MapPtr {
-		ips = append(ips, *v)
-	}
-
-	return ips
+	return retval
 }

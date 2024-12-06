@@ -8,6 +8,40 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
+func TestKeys(t *testing.T) {
+	m := map[string]int{
+		"blah": 3,
+		"yawn": 2,
+		"mlem": 18,
+	}
+
+	keys := maple.Keys(m)
+	slices.Sort(keys)
+
+	expected := []string{"blah", "mlem", "yawn"}
+
+	if diff := cmp.Diff(keys, expected); diff != "" {
+		t.Error(diff)
+	}
+}
+
+func TestValues(t *testing.T) {
+	m := map[string]int{
+		"blah": 3,
+		"yawn": 2,
+		"mlem": 18,
+	}
+
+	keys := maple.Values(m)
+	slices.Sort(keys)
+
+	expected := []int{2, 3, 18}
+
+	if diff := cmp.Diff(keys, expected); diff != "" {
+		t.Error(diff)
+	}
+}
+
 func TestInvert(t *testing.T) {
 	m := map[string]int{
 		"foo":   1,

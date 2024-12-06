@@ -32,34 +32,6 @@ func Pairings[K comparable, V any](m map[K]V) []Pairing[K, V] {
 	return pairings
 }
 
-type Defaulter[K comparable, V any] struct {
-	Map         map[K]V
-	DefaultFunc func(K) V
-}
-
-func DefaulterFor[K comparable, V any](m map[K]V, f func(K) V) Defaulter[K, V] {
-	return Defaulter[K, V]{
-		Map:         m,
-		DefaultFunc: f,
-	}
-}
-
-func EmptyDefaulter[K comparable, V any](f func(K) V) Defaulter[K, V] {
-	return Defaulter[K, V]{
-		Map:         map[K]V{},
-		DefaultFunc: f,
-	}
-}
-
-func (d Defaulter[K, V]) Get(key K) V {
-	v, exists := d.Map[key]
-	if !exists {
-		v = d.DefaultFunc(key)
-		d.Map[key] = v
-	}
-	return v
-}
-
 func Invert[K comparable, V comparable](m map[K]V) map[V][]K {
 	retval := map[V][]K{}
 	for k, v := range m {
